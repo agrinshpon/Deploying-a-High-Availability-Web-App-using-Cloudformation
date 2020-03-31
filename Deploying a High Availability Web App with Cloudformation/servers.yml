@@ -4,8 +4,32 @@ Description: >
 Parameters:
 
     EnvironmentName:
-        Description: An environment name that will be prefixed to resource names
-        Type: String
+      Description: An environment name that will be prefixed to resource names
+      Type: String
+
+    MinServer:
+      Description: Minimum number of servers for application
+      Type: 'String'
+
+    MaxServer:
+      Desciption: Maximum number of servers for application
+      Type: 'String'
+
+    DesiredServer:
+      Desciption: Desired number of servers for application
+      Type: 'String'
+
+    LBInstanceType:
+      Description: Instance type for load balancer
+      Type: 'String'
+
+    LBVolumeSize:
+      Description: Volume Size for load balancer
+      Type: 'String'
+
+    BastionKeyPair:
+      Description: Key pair for bastion hosts that was created through the console
+      Type: 'AWS::EC2::KeyPair::KeyName'
 
 Resources:
 
@@ -36,8 +60,8 @@ Resources:
           !Sub "${EnvironmentName}-VPCID"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
@@ -49,27 +73,66 @@ Resources:
         ToPort: 65535
         CidrIp: 0.0.0.0/0
 
+    BastionSecGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Bastion host security groups
+        VpcId:
+          Fn::ImportValue:
+            !Sub "${EnvironmentName}-VPCID"
+        SecurityGroupIngess:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+    BastionHostPublicSubnet1:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageID: ami-06f2f779464715dc5
+        InstanceType: t2.micro
+        KeyName: !Ref BastionKeyPair
+        SubnetId:
+          Fn::ImportValue:
+            Fn::Sub: "${EnvironmentName}-PUB1-SN"
+        AvailabilityZone: !Select [ 0, !GetAZs '' ]
+        SecurityGroups:
+        - Ref: BastionSecGroup
+
+    BastionHostPublicSubnet2:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageID: ami-06f2f779464715dc5
+        InstanceType: t2.micro
+        KeyName: !Ref BastionKeyPair
+        SubnetId:
+          Fn::ImportValue:
+            Fn::Sub: "${EnvironmentName}-PUB2-SN"
+        AvailabilityZone: !Select [ 1, !GetAZs '' ]
+        SecurityGroups:
+        - Ref: BastionSecGroup
+
   WebAppLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash
-          # Install docker
-          apt-get update -y
-          apt-get install apache2 -y
-          systemctl start apache2.service
-          cd /var/www/html
-          echo "Udacity Demo Web Server Up and Running!" > index.html
+          #!/bin/bash -xe
+          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+          apt update -y
+          apt install -y apache2
+          systemctl start apache2
+          systemctl enable apache2
+          rm ../../var/www/html/index.html
+          wget -P ../../var/www/html https://udacity-project-2.s3-us-west-2.amazonaws.com/index.html
       ImageId: ami-005bdb005fb00e791
-      KeyName: that-one
       SecurityGroups:
       - Ref: WebServerSecGroup
-      InstanceType: t3.medium
+      InstanceType: !Ref LBInstanceType
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
-          VolumeSize: '10'
+          VolumeSize: !Ref LBVolumeSize
 
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -79,8 +142,9 @@ Resources:
           !Sub "${EnvironmentName}-PRIV-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-      MinSize: '3'
-      MaxSize: '5'
+      MinSize: !Ref MinServer
+      MaxSize: !Ref MaxServer
+      DesiredCapacity: !Ref DesiredServer
       TargetGroupARNs:
       - Ref: WebAppTargetGroup
 
@@ -125,9 +189,63 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
       HealthyThresholdCount: 2
-      Port: 8080
+      Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId:
         Fn::ImportValue:
           Fn::Sub: "${EnvironmentName}-VPCID"
+
+    S3Role:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+            - sts:AssumeRole
+        Path: "/"
+
+    S3Policy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: S3Policy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource: "*"
+        Roles:
+        - Ref: S3Role
+
+    S3InstanceProfie:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: "/"
+        Roles:
+        - Ref: S3Role
+
+Outputs:
+
+  BastionHostPublicSubnet1IP:
+    Description: Bastion Host 1 public IP
+    Value: !GetAtt BastionHostPublicSubnet1.PublicIp
+    Export:
+      Name: !Sub "${EnvironmentName}-BASTION-HOST-IP-PUB1-SN"
+
+  BastionHostPublicSubnet2IP:
+    Description: Bastion Host 2 public IP
+    Value: !GetAtt BastionHostPublicSubnet2.PublicIp
+    Export:
+      Name: !Sub "${EnvironmentName}-BASTION-HOST-IP-PUB2-SN"
+
+  LoadBalancerDNSName:
+    Description: DNS Name of the web application
+    Value: !Join [ "", [ "http://", !GetAtt WebAppLB.DNSName ] ]
+    Export:
+      Name: !Sub "${EnvironmentName}-LB-DNS-NAME"
