@@ -12,8 +12,8 @@ This needs to be done in an automated fashion so that the infrastructure can be 
 
 > ##### The Basics
 
-|CRITERIA|MEETS SPECIFICATIONS|COMPLETED|
-|---|---|---|
+|CRITERIA|MEETS SPECIFICATIONS|
+|---|---|
 |Parameters| The more the better, but an exaggerated number of parameters can be messy ( say, 10 or more ). 1 or 0 is definitely lacking.|Resources|This is the mandatory section of the script, we are looking for a LoadBalancer, Launch Configuration, AutoScaling group a health check, security groups and a Listener and Target Group.|
 |Outputs|This is optional, but it would be nice to have a URL here with the Load Balancer DNS Name and “http” in front of it .|
 |Working Test|If the student provides a URL to verify his work is running properly, it will be a page that says “it works! Udagram, Udacity”|
