@@ -12,4 +12,4 @@ This needs to be done in an automated fashion so that the infrastructure can be 
 
 ### Architecture Diagram
 
-![Architecture Diagram](Architecture Diagram.png)
+![Architecture Diagram](architecturediagram.png)
