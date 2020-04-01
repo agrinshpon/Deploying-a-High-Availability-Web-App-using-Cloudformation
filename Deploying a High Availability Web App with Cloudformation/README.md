@@ -52,7 +52,7 @@ This needs to be done in an automated fashion so that the infrastructure can be 
 
 **1.** Create an S3 bucket and upload the index.zip file. Change the index.zip file's location in the launch configuration's user script.
 
-**2.** Create a key pair for your Bastion Hosts and change the `KeyPair` parameter in the server-parameters.json file to your newly created key pair.
+**2.** Create a key pair for your Bastion Hosts in case you need to SSH into your private subnet instances and change the `KeyPair` parameter in the server-parameters.json file to your newly created key pair.
 
 **3.** Open up a terminal window and run `./create INSERTNAME network.yml network-parameters.json`. This will create a Cloudformation stack named INSERTNAME for your network architecture.
 
