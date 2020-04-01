@@ -8,14 +8,14 @@ You have been tasked with deploying the application, along with the necessary su
 
 This needs to be done in an automated fashion so that the infrastructure can be discarded as soon as the testing team finishes their tests and gathers their results.
 
-###Server specs
+### Server specs
 
 
 You'll need to create a Launch Configuration for your application servers in order to deploy four servers, two located in each of your private subnets. The launch configuration will be used by an auto-scaling group.
 
 You'll need two vCPUs and at least 4GB of RAM. The Operating System to be used is Ubuntu 18. So, choose an Instance size and Machine Image (AMI) that best fits this spec. Be sure to allocate at least 10GB of disk space so that you don't run into issues.
 
-###Security Groups and Roles
+### Security Groups and Roles
 
 
 Since you will be downloading the application archive from an S3 Bucket, you'll need to create an IAM Role that allows your instances to use the S3 Service.
@@ -30,7 +30,7 @@ One of the output exports of the CloudFormation script should be the public URL 
 
 Bonus points if you add http:// in front of the load balancer DNS Name in the output, for convenience.
 
-###Other Considerations
+### Other Considerations
 
 
 You can deploy your servers with an SSH Key into Public subnets while you are creating the script. This helps with troubleshooting. Once done, move them to your private subnets and remove the SSH Key from your Launch Configuration.
