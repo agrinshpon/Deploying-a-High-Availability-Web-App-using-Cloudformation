@@ -30,16 +30,16 @@ This needs to be done in an automated fashion so that the infrastructure can be 
 
 |CRITERIA|MEETS SPECIFICATIONS|
 |---|---|
-|Subnets|Students should be using PRIV-NET ( private subnets ) for their auto-scaling instances|
-|Machine Specs|The machine should have 10 GB or more of disk and should be a t3.small or better.|
-|SSH Key|There shouldn’t be a ‘keyname’ property in the launch config|
+|Subnets|Students should be using PRIV-NET ( private subnets ) for their auto-scaling instances                  |
+|Machine Specs|The machine should have 10 GB or more of disk and should be a t3.small or better.                 |
+|SSH Key|There shouldn’t be a ‘keyname’ property in the launch config                                            |
 
 > ##### Bonus
 
 |CRITERIA|MEETS SPECIFICATIONS|
 |---|---|
-|Output|Any values in the output section are a bonus|
-|Bastion Host|Any resource of type AWS::EC2::Instance, optional, but nice to have.|
+|Output|Any values in the output section are a bonus                                                              |
+|Bastion Host|Any resource of type AWS::EC2::Instance, optional, but nice to have.                                |
 
 
 ## My Solution

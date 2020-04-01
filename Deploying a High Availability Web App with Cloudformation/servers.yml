@@ -125,8 +125,9 @@ Resources:
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
-          aws s3 cp s3://udacity-project-2/index.zip .
-          unzip -o project2.zip
+          aws s3 cp s3://udacity-project-2/index.zip /var/www/html
+          unzip -o index.zip
+          sudo service apache2 restart
       ImageId: ami-0d1cd67c26f5fca19
       IamInstanceProfile: !Ref S3InstanceProfile
       SecurityGroups:
