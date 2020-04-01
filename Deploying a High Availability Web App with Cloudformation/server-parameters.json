@@ -26,5 +26,5 @@
 	{
 		"ParameterKey": "BastionKeyPair",
 		"ParameterValue": "bastion-key-pair"
-	},
+	}
 ]

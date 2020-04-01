@@ -12,11 +12,11 @@ Parameters:
       Type: 'String'
 
     MaxServer:
-      Desciption: Maximum number of servers for application
+      Description: Maximum number of servers for application
       Type: 'String'
 
     DesiredServer:
-      Desciption: Desired number of servers for application
+      Description: Desired number of servers for application
       Type: 'String'
 
     LBInstanceType:
@@ -73,44 +73,46 @@ Resources:
         ToPort: 65535
         CidrIp: 0.0.0.0/0
 
-    BastionSecGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Bastion host security groups
-        VpcId:
-          Fn::ImportValue:
-            !Sub "${EnvironmentName}-VPCID"
-        SecurityGroupIngess:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
+  BastionSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion host security groups
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
 
-    BastionHostPublicSubnet1:
-      Type: AWS::EC2::Instance
-      Properties:
-        ImageID: ami-06f2f779464715dc5
-        InstanceType: t2.micro
-        KeyName: !Ref BastionKeyPair
-        SubnetId:
-          Fn::ImportValue:
-            Fn::Sub: "${EnvironmentName}-PUB1-SN"
-        AvailabilityZone: !Select [ 0, !GetAZs '' ]
-        SecurityGroups:
-        - Ref: BastionSecGroup
+  BastionHostPublicSubnet1:
+    Type: AWS::EC2::Instance
+    DependsOn: BastionSecGroup
+    Properties:
+      ImageId: ami-06f2f779464715dc5
+      InstanceType: t2.micro
+      KeyName: !Ref BastionKeyPair
+      SubnetId:
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-PUB1-SN"
+#      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      SecurityGroupIds:
+      - Ref: BastionSecGroup
 
-    BastionHostPublicSubnet2:
-      Type: AWS::EC2::Instance
-      Properties:
-        ImageID: ami-06f2f779464715dc5
-        InstanceType: t2.micro
-        KeyName: !Ref BastionKeyPair
-        SubnetId:
-          Fn::ImportValue:
-            Fn::Sub: "${EnvironmentName}-PUB2-SN"
-        AvailabilityZone: !Select [ 1, !GetAZs '' ]
-        SecurityGroups:
-        - Ref: BastionSecGroup
+  BastionHostPublicSubnet2:
+    Type: AWS::EC2::Instance
+    DependsOn: BastionSecGroup
+    Properties:
+      ImageId: ami-06f2f779464715dc5
+      InstanceType: t2.micro
+      KeyName: !Ref BastionKeyPair
+      SubnetId:
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-PUB2-SN"
+#      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      SecurityGroupIds:
+      - Ref: BastionSecGroup
 
   WebAppLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -196,39 +198,39 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${EnvironmentName}-VPCID"
 
-    S3Role:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-              - ec2.amazonaws.com
-            Action:
-            - sts:AssumeRole
-        Path: "/"
+  S3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
 
-    S3Policy:
-      Type: AWS::IAM::Policy
-      Properties:
-        PolicyName: S3Policy
-        PolicyDocument:
-          Statement:
-          - Effect: Allow
-            Action:
-              - s3:*
-            Resource: "*"
-        Roles:
-        - Ref: S3Role
+  S3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: S3Policy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource: "*"
+      Roles:
+      - Ref: S3Role
 
-    S3InstanceProfie:
-      Type: AWS::IAM::Role
-      Properties:
-        Path: "/"
-        Roles:
-        - Ref: S3Role
+  S3InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: S3Role
 
 Outputs:
 
