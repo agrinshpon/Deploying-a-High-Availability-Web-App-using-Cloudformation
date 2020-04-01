@@ -20,23 +20,23 @@ This needs to be done in an automated fashion so that the infrastructure can be 
 
 > ##### Load Balancer
 
-|CRITERIA|MEETS SPECIFICATIONS|COMPLETED|
-|---|---|---|
+|CRITERIA|MEETS SPECIFICATIONS|
+|---|---|
 |Target Group|The auto-scaling group needs to have a property that associates it with a target group. The Load Balancer will have a Listener rule associated with the same target group|
 |Health Check and Listener|Port 80 should be used in Security groups, health checks and listeners associated with the load balancer|
 
 > ##### Auto-Scaling
 
-|CRITERIA|MEETS SPECIFICATIONS|COMPLETED|
-|---|---|---|
+|CRITERIA|MEETS SPECIFICATIONS|
+|---|---|
 |Subnets|Students should be using PRIV-NET ( private subnets ) for their auto-scaling instances|
 |Machine Specs|The machine should have 10 GB or more of disk and should be a t3.small or better.|
 |SSH Key|There shouldn’t be a ‘keyname’ property in the launch config|
 
 > ##### Bonus
 
-|CRITERIA|MEETS SPECIFICATIONS|COMPLETED|
-|---|---|---|
+|CRITERIA|MEETS SPECIFICATIONS|
+|---|---|
 |Output|Any values in the output section are a bonus|
 |Bastion Host|Any resource of type AWS::EC2::Instance, optional, but nice to have.|
 
