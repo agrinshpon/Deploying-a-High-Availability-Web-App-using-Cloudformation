@@ -1,4 +1,4 @@
-# Deplying a High Availability Web App using Cloudformation
+# Deploying a High Availability Web App using Cloudformation
 
 ## The Task:
 
